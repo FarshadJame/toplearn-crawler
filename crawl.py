@@ -1,6 +1,7 @@
 import json
 from abc import ABC, abstractmethod
 import requests
+from pars import BlogPageParser
 from config import URL
 from bs4 import BeautifulSoup
 
@@ -14,6 +15,15 @@ class BaseCrawler(ABC):
     def store(self, data):
         pass
 
+    @staticmethod
+    def get(url, page_id=None):
+        res = requests.get(url + str(page_id))
+
+        if res.status_code == 200:
+            return res
+
+        return None
+
 
 class LinkCrawler(BaseCrawler):
     def start(self):
@@ -22,15 +32,6 @@ class LinkCrawler(BaseCrawler):
     def store(self, data):
         with open('archives/data.json', 'w') as f:
             f.write(json.dumps(data))
-
-    @staticmethod
-    def get_page(url, page_id):
-        res = requests.get(url.format(str(page_id)))
-
-        if res.status_code == 200:
-            return res
-
-        return None
 
     @staticmethod
     def find_links(html_doc):
@@ -43,7 +44,7 @@ class LinkCrawler(BaseCrawler):
         crawl = True
         blog_list = list()
         while crawl:
-            response = self.get_page(URL, page_id)
+            response = self.get(URL, page_id)
             links = self.find_links(response.text)
             if len(blog_list) > 1:
                 if links[0].get('href') == blog_list[0].get('href'):
@@ -55,8 +56,20 @@ class LinkCrawler(BaseCrawler):
 
 
 class DataCrawler(BaseCrawler):
+    def __init__(self):
+        self.links = self.__load_links()
+        self.parser = BlogPageParser()
+
+    @staticmethod
+    def __load_links():
+        with open('archives/data.json', 'r') as f:
+            return json.loads(f.read())
+
     def start(self):
-        pass
+        for link in self.links:
+            response = self.get(link)
+            data = self.parser.parse(response.text)
+            print(data)
 
     def store(self, data):
         pass

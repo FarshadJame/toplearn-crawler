@@ -1,1 +1,1 @@
-URL = 'https://toplearn.com/blog?pageId={}'
+URL = 'https://toplearn.com/blog?pageId='

@@ -1,6 +1,5 @@
 import sys
-
-from crawl import LinkCrawler
+from crawl import LinkCrawler, DataCrawler
 
 if __name__ == '__main__':
     switch = sys.argv[1]
@@ -8,4 +7,5 @@ if __name__ == '__main__':
         crawler = LinkCrawler()
         crawler.start()
     elif switch == 'extract_pages':
-        pass
+        crawler = DataCrawler()
+        crawler.start()
