@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 
 class BaseCrawler(ABC):
     @abstractmethod
-    def start(self):
+    def start(self, store=False):
         pass
 
     @abstractmethod
@@ -26,8 +26,9 @@ class BaseCrawler(ABC):
 
 
 class LinkCrawler(BaseCrawler):
-    def start(self):
-        self.store(self.start_crawl())
+    def start(self, store=False):
+        if store:
+            self.store(self.start_crawl())
 
     def store(self, data):
         with open('archives/data.json', 'w') as f:
@@ -65,12 +66,15 @@ class DataCrawler(BaseCrawler):
         with open('archives/data.json', 'r') as f:
             return json.loads(f.read())
 
-    def start(self):
+    def start(self, store=False):
         for link in self.links:
             response = self.get(link)
             data = self.parser.parse(response.text)
-            print(data)
-            break
+            if store:
+                self.store(data)
 
     def store(self, data):
-        pass
+        filename = data['short_link'].split('/')[-1]
+        with open(f'archives/blogs/{filename}.json', 'w') as f:
+            f.write(json.dumps(data))
+        print(f'archives/blogs/{filename}.json')
