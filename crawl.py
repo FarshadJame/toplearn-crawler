@@ -70,6 +70,7 @@ class DataCrawler(BaseCrawler):
             response = self.get(link)
             data = self.parser.parse(response.text)
             print(data)
+            break
 
     def store(self, data):
         pass
